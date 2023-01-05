@@ -308,6 +308,8 @@ HOST_LISTEN_ADDR="${DEFINE_LISTEN:-$HOST_IP}"
 CONTAINER_SHM_SIZE="${CONTAINER_SHM_SIZE:-64M}"
 HOST_SERVICE_PORT="${CONTAINER_SERVICE_PORT:-}"
 CONTAINER_HTTP_PROTO="${CONTAINER_HTTP_PROTO:-http}"
+SET_USER_NAME="${CONTAINER_USER_NAME:-$I2P_USERNAME}"
+SET_USER_PASS="${CONTAINER_USER_NAME:-$I2P_PASSWORD}"
 HOST_NETWORK_TYPE="--network ${HOST_NETWORK_TYPE:-bridge}"
 POST_SHOW_FINISHED_MESSAGE="${POST_SHOW_FINISHED_MESSAGE:-}"
 HOST_WEB_PORT="${CONTAINER_HTTPS_PORT:-$CONTAINER_HTTP_PORT}"
@@ -376,8 +378,8 @@ CONTAINER_X11_XAUTH=""
 if [ "$NGINX_AUTH" = "yes" ]; then
   [ -d "/etc/nginx/auth" ] || mkdir -p "/etc/nginx/auth"
   if [ ! -f "/etc/nginx/auth/$APPNAME" ] && [ -n "$(builtin type -P htpasswd)" ]; then
-    printf_yellow "Creating auth with user: root and pass: tor"
-    htpasswd -c "/etc/nginx/auth/$APPNAME" "${I2P_USERNAME:-root}" "${I2P_PASSWORD:-toor}"
+    printf_yellow "Creating auth with user: root and pass: tor in /etc/nginx/auth/$APPNAME"
+    htpasswd -b -c "/etc/nginx/auth/$APPNAME" "${I2P_USERNAME:-root}" "${I2P_PASSWORD:-toor}" &>/dev/null
   fi
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -605,8 +607,6 @@ if docker ps -a | grep -qs "$APPNAME"; then
     printf_cyan "Service is listening on $HOST_LISTEN_ADDR:$PRETTY_PORT or $CONTAINER_HOSTNAME:$PRETTY_PORT"
     printf_yellow "and should be available at: $NGINX_PROXY or $CONTAINER_HTTP_PROTO//$CONTAINER_HOSTNAME:$PRETTY_PORT"
   fi
-  SET_USER_NAME="${CONTAINER_USER_NAME:-$I2P_USERNAME}"
-  SET_USER_PASS="${CONTAINER_USER_NAME:-$I2P_PASSWORD}"
   [ -z "$SET_USER_NAME" ] || printf_cyan "Username is:  $SET_USER_NAME"
   [ -z "$SET_USER_PASS" ] || printf_purple "Password is:  $SET_USER_PASS"
   [ -z "$POST_SHOW_FINISHED_MESSAGE" ] || printf_green "$POST_SHOW_FINISHED_MESSAGE"

@@ -375,8 +375,9 @@ CONTAINER_X11_XAUTH=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 if [ "$NGINX_AUTH" = "yes" ]; then
   [ -d "/etc/nginx/auth" ] || mkdir -p "/etc/nginx/auth"
-  if [ ! -f "/etc/nginx/auth/$APPNAME" ] && [ -n "$(builtin type -P htpasswd)" ] && [ -n "$I2P_USERNAME" ] && [ -n "$I2P_PASSWORD" ]; then
-    htpasswd -c "/etc/nginx/auth/$APPNAME" "$I2P_USERNAME" "$I2P_PASSWORD"
+  if [ ! -f "/etc/nginx/auth/$APPNAME" ] && [ -n "$(builtin type -P htpasswd)" ]; then
+    printf_yellow "Creating auth with user: root and pass: tor"
+    htpasswd -c "/etc/nginx/auth/$APPNAME" "${I2P_USERNAME:-root}" "${I2P_PASSWORD:-toor}"
   fi
 fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202301041937-git
+##@Version           :  202301042011-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.com
 # @@License          :  LICENSE.md
 # @@ReadME           :  install.sh --help
 # @@Copyright        :  Copyright: (c) 2023 Jason Hempstead, Casjays Developments
-# @@Created          :  Wednesday, Jan 04, 2023 19:37 EST
+# @@Created          :  Wednesday, Jan 04, 2023 20:11 EST
 # @@File             :  install.sh
 # @@Description      :
 # @@Changelog        :  New script
@@ -19,7 +19,7 @@
 # @@Template         :  installers/dockermgr
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 APPNAME="i2p"
-VERSION="202301041937-git"
+VERSION="202301042011-git"
 HOME="${USER_HOME:-$HOME}"
 USER="${SUDO_USER:-$USER}"
 RUN_USER="${SUDO_USER:-$USER}"
@@ -223,7 +223,7 @@ ADD_SYSCTL+=""
 CONTAINER_LINK=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Define additional mounts [ /dir:/dir ]
-ADDITIONAL_MOUNTS="$LOCAL_CONFIG_DIR:/config:z $LOCAL_DATA_DIR:/data:z "
+ADDITIONAL_MOUNTS="$LOCAL_CONFIG_DIR:/i2p/.i2p:z $LOCAL_DATA_DIR:/i2psnark:z "
 ADDITIONAL_MOUNTS+=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Define additional variables [ myvar=var ]
@@ -247,13 +247,13 @@ CONTAINER_HTTP_PROTO="http"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add service port [port] or [port:port] - LISTEN will be added if defined [DEFINE_LISTEN]
 # Only ONE HTTP or HTTPS if web server or SERVICE port for mysql pgsql ftp etc. add more to CONTAINER_ADD_CUSTOM_PORT
-CONTAINER_HTTP_PORT="127.0.0.1:7657"
+CONTAINER_HTTP_PORT="127.0.0.1:7657:7657/tcp"
 CONTAINER_HTTPS_PORT=""
 CONTAINER_SERVICE_PORT=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add Add service port [port] or [port:port] - LISTEN will be added if defined [DEFINE_LISTEN]
-CONTAINER_ADD_CUSTOM_PORT="4444 4445 6668 7654 7656 7658 7659 7660 "
-CONTAINER_ADD_CUSTOM_PORT+="7652 7653/udp 12345/tcp 12345/udp"
+CONTAINER_ADD_CUSTOM_PORT="4444 4445 6668 7654 7656 7658 7659 7660 7652 7653/udp 12345"
+CONTAINER_ADD_CUSTOM_PORT+=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add Add service port [listen]:[externalPort:internalPort]/[tcp,udp]
 CONTAINER_ADD_CUSTOM_LISTEN=""

@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202301042011-git
+##@Version           :  202301042023-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.com
 # @@License          :  LICENSE.md
 # @@ReadME           :  install.sh --help
 # @@Copyright        :  Copyright: (c) 2023 Jason Hempstead, Casjays Developments
-# @@Created          :  Wednesday, Jan 04, 2023 20:11 EST
+# @@Created          :  Wednesday, Jan 04, 2023 20:23 EST
 # @@File             :  install.sh
 # @@Description      :
 # @@Changelog        :  New script
@@ -19,7 +19,7 @@
 # @@Template         :  installers/dockermgr
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 APPNAME="i2p"
-VERSION="202301042011-git"
+VERSION="202301042023-git"
 HOME="${USER_HOME:-$HOME}"
 USER="${SUDO_USER:-$USER}"
 RUN_USER="${SUDO_USER:-$USER}"
@@ -252,8 +252,8 @@ CONTAINER_HTTPS_PORT=""
 CONTAINER_SERVICE_PORT=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add Add service port [port] or [port:port] - LISTEN will be added if defined [DEFINE_LISTEN]
-CONTAINER_ADD_CUSTOM_PORT="4444 4445 6668 7654 7656 7658 7659 7660 7652 7653/udp 12345"
-CONTAINER_ADD_CUSTOM_PORT+=""
+CONTAINER_ADD_CUSTOM_PORT="4444 4445 6668 7654 7656 7658 7659 "
+CONTAINER_ADD_CUSTOM_PORT+="7660 7652 7653/udp 12345 "
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add Add service port [listen]:[externalPort:internalPort]/[tcp,udp]
 CONTAINER_ADD_CUSTOM_LISTEN=""
@@ -337,9 +337,9 @@ HOST_LISTEN_ADDR="${HOST_LISTEN_ADDR//:*/}"
 PRETTY_PORT="${HOST_SERVICE_PORT:-$HOST_PORT}"
 PRETTY_PORT="${PRETTY_PORT//*:\/\//}"
 if echo "$PRETTY_PORT" | grep -qE '\.*:.*.:[0-9]'; then
-  PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
+  PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}' | grep '^' || echo "$PRETTY_PORT")"
 elif echo "$PRETTY_PORT" | grep -qE '.*:.*.:[0-9]'; then
-  PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
+  PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}' | grep '^' || echo "$PRETTY_PORT")"
 elif echo "$PRETTY_PORT" | grep -qE ':[0-9]'; then
   PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $NF}' | grep '^' || echo "$PRETTY_PORT")"
 fi

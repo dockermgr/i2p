@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-##@Version           :  202301041721-git
+##@Version           :  202301041937-git
 # @@Author           :  Jason Hempstead
 # @@Contact          :  jason@casjaysdev.com
 # @@License          :  LICENSE.md
 # @@ReadME           :  install.sh --help
 # @@Copyright        :  Copyright: (c) 2023 Jason Hempstead, Casjays Developments
-# @@Created          :  Wednesday, Jan 04, 2023 17:21 EST
+# @@Created          :  Wednesday, Jan 04, 2023 19:37 EST
 # @@File             :  install.sh
 # @@Description      :
 # @@Changelog        :  New script
@@ -19,7 +19,7 @@
 # @@Template         :  installers/dockermgr
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 APPNAME="i2p"
-VERSION="202301041721-git"
+VERSION="202301041937-git"
 HOME="${USER_HOME:-$HOME}"
 USER="${SUDO_USER:-$USER}"
 RUN_USER="${SUDO_USER:-$USER}"
@@ -129,11 +129,11 @@ I2P_USERNAME="${I2P_USERNAME:-$DEFAULT_USERNAME}"
 I2P_PASSWORD="${I2P_PASSWORD:-$DEFAULT_PASSWORD}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Set container hostname and domain - Default i2p
-CONTAINER_HOSTNAME=""
-CONTAINER_DOMAINNAME=""
+CONTAINER_HOSTNAME="$APPNAME"
+CONTAINER_DOMAINNAME="$HOSTNAME"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # URL to container image [docker pull URL]
-HUB_IMAGE_URL="geti2p/i2p"
+HUB_IMAGE_URL="casjaysdevdocker/i2p"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # image tag [docker pull HUB_IMAGE_URL:tag]
 HUB_IMAGE_TAG="latest"
@@ -223,7 +223,7 @@ ADD_SYSCTL+=""
 CONTAINER_LINK=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Define additional mounts [ /dir:/dir ]
-ADDITIONAL_MOUNTS="$LOCAL_CONFIG_DIR:/i2p/.i2p:z $LOCAL_DATA_DIR:/i2psnark:z "
+ADDITIONAL_MOUNTS="$LOCAL_CONFIG_DIR:/config:z $LOCAL_DATA_DIR:/data:z "
 ADDITIONAL_MOUNTS+=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Define additional variables [ myvar=var ]
@@ -252,8 +252,8 @@ CONTAINER_HTTPS_PORT=""
 CONTAINER_SERVICE_PORT=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add Add service port [port] or [port:port] - LISTEN will be added if defined [DEFINE_LISTEN]
-CONTAINER_ADD_CUSTOM_PORT="4444 4445 6668 7654 7656 7658 7659 7660 7652 7653/udp 12345 "
-CONTAINER_ADD_CUSTOM_PORT+=""
+CONTAINER_ADD_CUSTOM_PORT="4444 4445 6668 7654 7656 7658 7659 7660 "
+CONTAINER_ADD_CUSTOM_PORT+="7652 7653/udp 12345/tcp 12345/udp"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Add Add service port [listen]:[externalPort:internalPort]/[tcp,udp]
 CONTAINER_ADD_CUSTOM_LISTEN=""
@@ -262,6 +262,7 @@ CONTAINER_ADD_CUSTOM_LISTEN=""
 POST_SHOW_FINISHED_MESSAGE=""
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Setup nginx proxy variables
+NGINX_AUTH="yes"
 NGINX_SSL="yes"
 NGINX_HTTP="80"
 NGINX_HTTPS="443"
@@ -305,13 +306,14 @@ HOST_TIMEZONE="${TZ:-$TIMEZONE}"
 DEFINE_LISTEN="${DEFINE_LISTEN:-}"
 HOST_LISTEN_ADDR="${DEFINE_LISTEN:-$HOST_IP}"
 CONTAINER_SHM_SIZE="${CONTAINER_SHM_SIZE:-64M}"
-HOST_SERVICE_PORT="${CONTAINER_SERVICE_PORT//:*/}"
+HOST_SERVICE_PORT="${CONTAINER_SERVICE_PORT:-}"
 CONTAINER_HTTP_PROTO="${CONTAINER_HTTP_PROTO:-http}"
 HOST_NETWORK_TYPE="--network ${HOST_NETWORK_TYPE:-bridge}"
 POST_SHOW_FINISHED_MESSAGE="${POST_SHOW_FINISHED_MESSAGE:-}"
 HOST_WEB_PORT="${CONTAINER_HTTPS_PORT:-$CONTAINER_HTTP_PORT}"
-CONTAINER_DOMAINNAME="${CONTAINER_DOMAINNAME:-"$(hostname -d 2>/dev/null | grep '^' || echo 'local')"}"
-CONTAINER_HOSTNAME="${CONTAINER_HOSTNAME:-$APPNAME.$CONTAINER_DOMAINNAME}"
+SERVER_SHORT_DOMAIN="$(hostname -f 2>/dev/null | grep '^')"
+SERVER_FULL_DOMAIN="$(hostname -d 2>/dev/null | grep '^' || echo 'home')"
+CONTAINER_DOMAINNAME="${CONTAINER_DOMAINNAME:-$SERVER_SHORT_DOMAIN.$SERVER_FULL_DOMAIN}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # Configure variables
 [ "$CONTAINER_HTTPS_PORT" = "" ] || CONTAINER_HTTP_PROTO="https"
@@ -319,12 +321,13 @@ CONTAINER_HOSTNAME="${CONTAINER_HOSTNAME:-$APPNAME.$CONTAINER_DOMAINNAME}"
 [ "$NGINX_SSL" = "yes" ] && [ -n "$NGINX_HTTPS" ] && NGINX_PORT="${NGINX_HTTPS:-443}" || NGINX_PORT="${NGINX_HTTP:-80}"
 [ "$HOST_RESOLVE_MOUNT" = "yes" ] && ADDITIONAL_MOUNTS+="$HOST_RESOLVE_MOUNT:/etc/resolv.conf " || HOST_RESOLVE_MOUNT=""
 [ "$HOST_LOCAL_ONLY" = "yes" ] && DEFINE_LISTEN="${LOCAL_IP:-127.0.0.1}" && HOST_LISTEN_ADDR="${LOCAL_IP:-127.0.0.1}" || HOST_LOCAL_ONLY=""
+[[ "$CONTAINER_DOMAINNAME" = server.* ]] && CONTAINER_HOSTNAME="$APPNAME.$SERVER_FULL_DOMAIN" || CONTAINER_HOSTNAME="${CONTAINER_HOSTNAME:-$APPNAME.$CONTAINER_DOMAINNAME}"
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # rewrite variables
 [ -n "$HUB_IMAGE_TAG" ] || HUB_IMAGE_TAG="latest"
 [ -n "$CONTAINER_COMMANDS" ] || CONTAINER_COMMANDS=""
 [ -n "$HOST_TIMEZONE" ] || HOST_TIMEZONE="America/New_York"
-[ -n "$HOST_WEB_PORT" ] && HOST_PORT="${HOST_WEB_PORT//*:/}"
+[ -n "$HOST_WEB_PORT" ] && HOST_PORT="${HOST_WEB_PORT:-}"
 [ -n "$DEFINE_LISTEN" ] && DEFINE_LISTEN="${DEFINE_LISTEN//:*/}" || DEFINE_LISTEN=""
 [ -z "$CONTAINER_USER_PASS" ] || ADDITION_ENV+="${CONTAINER_ENV_PASS_NAME:-password}=$CONTAINER_USER_PASS "
 [ -z "$CONTAINER_USER_NAME" ] || ADDITION_ENV+="${CONTAINER_ENV_USER_NAME:-username}=$CONTAINER_USER_NAME "
@@ -333,11 +336,11 @@ HOST_LISTEN_ADDR="${HOST_LISTEN_ADDR//:*/}"
 PRETTY_PORT="${HOST_SERVICE_PORT:-$HOST_PORT}"
 PRETTY_PORT="${PRETTY_PORT//*:\/\//}"
 if echo "$PRETTY_PORT" | grep -qE '.*:.*.:[0-9]'; then
-  HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}')"
-  PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}' | grep '^' || echo "$PRETTY_PORT")"
+  HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}')"
+  PRETTY_PORT="$(echo "$HOST_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
 elif echo "$PRETTY_PORT" | grep -qE ':[0-9]'; then
   HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}')"
-  PRETTY_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $NF}' | grep '^' || echo "$PRETTY_PORT")"
+  PRETTY_PORT="$(echo "$HOST_PORT" | awk -F ':' '{printf $NF}' | grep '^' || echo "$PRETTY_PORT")"
 fi
 PRETTY_PORT="${PRETTY_PORT//*:/}"
 PRETTY_PORT="${PRETTY_PORT//\/*/}"
@@ -367,6 +370,13 @@ fi
 HOST_X11_XAUTH=""
 CONTAINER_DISPLAY=""
 CONTAINER_X11_XAUTH=""
+# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+if [ "$NGINX_AUTH" = "yes" ]; then
+  [ -d "/etc/nginx/auth" ] || mkdir -p "/etc/nginx/auth"
+  if [ ! -f "/etc/nginx/auth/$APPNAME" ] && [ -n "$(builtin type -P htpasswd)" ] && [ -n "$I2P_USERNAME" ] && [ -n "$I2P_PASSWORD" ]; then
+    htpasswd -c "/etc/nginx/auth/$APPNAME" "$I2P_USERNAME" "$I2P_PASSWORD"
+  fi
+fi
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # SSL setup
 if [ "$SSL_ENABLED" = "yes" ]; then
@@ -561,10 +571,10 @@ run_postinst() {
   [ -w "/etc/hosts" ] || return 0
   if ! grep -sq "$CONTAINER_HOSTNAME" "/etc/hosts"; then
     if [ -n "$PRETTY_PORT" ]; then
-      if [ $(hostname -d 2>/dev/null | grep '^') = 'local' ]; then
-        echo "$HOST_LISTEN_ADDR     $APPNAME.local" | sudo tee -a "/etc/hosts" &>/dev/null
+      if [ $(hostname -d 2>/dev/null | grep '^') = 'home' ]; then
+        echo "$HOST_LISTEN_ADDR     $APPNAME.home" | sudo tee -a "/etc/hosts" &>/dev/null
       else
-        echo "$HOST_LISTEN_ADDR     $APPNAME.local" | sudo tee -a "/etc/hosts" &>/dev/null
+        echo "$HOST_LISTEN_ADDR     $APPNAME.home" | sudo tee -a "/etc/hosts" &>/dev/null
         echo "$HOST_LISTEN_ADDR     $CONTAINER_HOSTNAME" | sudo tee -a "/etc/hosts" &>/dev/null
       fi
     fi

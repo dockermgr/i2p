@@ -605,8 +605,10 @@ if docker ps -a | grep -qs "$APPNAME"; then
     printf_cyan "Service is listening on $HOST_LISTEN_ADDR:$PRETTY_PORT or $CONTAINER_HOSTNAME:$PRETTY_PORT"
     printf_yellow "and should be available at: $NGINX_PROXY or $CONTAINER_HTTP_PROTO//$CONTAINER_HOSTNAME:$PRETTY_PORT"
   fi
-  [ -z "$CONTAINER_USER_NAME" ] || printf_cyan "Username is:  $CONTAINER_USER_NAME"
-  [ -z "$CONTAINER_USER_PASS" ] || printf_purple "Password is:  $CONTAINER_USER_PASS"
+  SET_USER_NAME="${CONTAINER_USER_NAME:-$I2P_USERNAME}"
+  SET_USER_PASS="${CONTAINER_USER_NAME:-$I2P_PASSWORD}"
+  [ -z "$SET_USER_NAME" ] || printf_cyan "Username is:  $SET_USER_NAME"
+  [ -z "$SET_USER_PASS" ] || printf_purple "Password is:  $SET_USER_PASS"
   [ -z "$POST_SHOW_FINISHED_MESSAGE" ] || printf_green "$POST_SHOW_FINISHED_MESSAGE"
 else
   [ "$ERROR_LOG" = "true" ] && printf_yellow "Errors logged to ${TMP:-/tmp}/$APPNAME.err.log"

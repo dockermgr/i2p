@@ -339,7 +339,7 @@ if echo "$PRETTY_PORT" | grep -qE '\.*:.*.:[0-9]'; then
   HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}')"
   PRETTY_PORT="$(echo "$HOST_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
 elif echo "$PRETTY_PORT" | grep -qE '.*:.*.:[0-9]'; then
-  HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}')"
+  HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}')"
   PRETTY_PORT="$(echo "$HOST_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
 elif echo "$PRETTY_PORT" | grep -qE ':[0-9]'; then
   HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}')"

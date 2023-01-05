@@ -335,8 +335,11 @@ CONTAINER_DOMAINNAME="${CONTAINER_DOMAINNAME:-$SERVER_SHORT_DOMAIN.$SERVER_FULL_
 HOST_LISTEN_ADDR="${HOST_LISTEN_ADDR//:*/}"
 PRETTY_PORT="${HOST_SERVICE_PORT:-$HOST_PORT}"
 PRETTY_PORT="${PRETTY_PORT//*:\/\//}"
-if echo "$PRETTY_PORT" | grep -qE '.*:.*.:[0-9]'; then
+if echo "$PRETTY_PORT" | grep -qE '\.*:.*.:[0-9]'; then
   HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $2}')"
+  PRETTY_PORT="$(echo "$HOST_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
+elif echo "$PRETTY_PORT" | grep -qE '.*:.*.:[0-9]'; then
+  HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}')"
   PRETTY_PORT="$(echo "$HOST_PORT" | awk -F ':' '{printf $1}' | grep '^' || echo "$PRETTY_PORT")"
 elif echo "$PRETTY_PORT" | grep -qE ':[0-9]'; then
   HOST_PORT="$(echo "$PRETTY_PORT" | awk -F ':' '{printf $1}')"
